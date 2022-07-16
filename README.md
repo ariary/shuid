@@ -1,5 +1,5 @@
 <div align=center>
-<img src=./29FE64AD-A0EF-4A23-8FD3-D646071A74C8.png>
+<img src=./icon.png>
 <pre><code><strong>Privileged persistence 
 <br>without using noisy and detectable SUID 
 <br>using <i>binfmt</i> Kernel feature instead</strong>
@@ -7,7 +7,7 @@ Also a good way to learn Nim and something new
 </code></pre>
 </div>
 
-## Like at home 🏡 <sup>(persistence)</sup>
+## Like at home! 🏡 <sup>(persistence)</sup>
 
 * First transfer `shuid` on target
 * Run it!<br><pre><code>./shuid</code></pre>
