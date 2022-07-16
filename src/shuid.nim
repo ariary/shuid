@@ -1,5 +1,19 @@
-# This is just an example to get you started. A typical binary package
-# uses this file as the main entry point of the application.
+proc shuid(
+  unprivileged = false, 
+  check = true, 
+  file = "", 
+  searchDir="/bin", 
+  chooseFile = false, 
+  payload = "/bin/sh",
+  noExec=false
+  ): void = echo chooseFile
 
 when isMainModule:
-  echo("Hello, World!")
+  import cligen;  dispatch shuid, help={"unprivileged": "run in unprivileged mode (binfmt not writable)",
+  "check": "perform exploit requirement checks",
+  "file": "SUID file to use",
+  "searchDir": "directory use to find SUID file",
+  "chooseFile": "choose SUID file to use from the list (if not taken randomly)",
+  "payload": "payload to execute to maintain peristance (run with privileged permissions)",
+  "noExec": "do not exec SUID file"
+  }
