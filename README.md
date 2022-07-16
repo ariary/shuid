@@ -1,5 +1,5 @@
 <div align=center>
-<img src=./icon.png>
+<img src=./3BE95711-0067-40AD-8774-A9C09DD10DF8.png>
 <pre><code><strong>Privileged persistence 
 <br>without using noisy and detectable SUID 
 <br>using <i>binfmt</i> Kernel feature instead</strong>
