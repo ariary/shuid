@@ -1,2 +1,2 @@
-build.and.run.shuild:
+build.and.run.shuid:
 	nim c -r src/shuid.nim
