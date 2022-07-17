@@ -13,7 +13,7 @@ Also a good way to learn Nim and something new
 * First transfer `shuid` on target
 * Run it!<br><pre><code>./shuid</code></pre>
 
-And that's all, you are under the radar. Process to obtain root shell will be outputted 
+And that's all, you are under the radar. The process to obtain root shell will be outputted 
 
 
 ##### More granular
