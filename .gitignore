@@ -1,1 +1,2 @@
-src/shuid
+bin/*
+src/interpreter/interpreter.c

@@ -1,5 +1,5 @@
 <div align=center>
-<img src=./3BE95711-0067-40AD-8774-A9C09DD10DF8.png>
+<img src=./img/icon2.png>
 <sup>*<i>«shuid» stands for shadow SUID file</i></sup>
 <pre><code><strong>Privileged persistence 
 <br>without using noisy and detectable SUID 

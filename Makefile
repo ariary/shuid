@@ -1,5 +1,5 @@
 build.and.run.shuid:
-	nim c -r src/shuid.nim
+	@echo "Only for debugging purpose";nim -o:bin/shuid c -r -d:InterpreterContent="`cat bin/interpreter`" src/shuid.nim
 
 build.shuid:
-	nim c src/shuid.nim
+	nim -o:bin/shuid c -d:InterpreterContent="`cat bin/interpreter`" src/shuid.nim
