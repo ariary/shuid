@@ -18,4 +18,4 @@ sed -i "s/CUSTOM_RULE_NAME/${RULE_NAME}/g" src/interpreter/interpreter.c
 gcc src/interpreter/interpreter.c -o bin/interpreter
 # compile shuid
 echo "[*] Build shuid with interpreter embeded"
-nim -o:bin/shuid c -d:INTERPRETER_CONTENT="`cat bin/interpreter`" -d:RULE_NAME="${RULE_NAME}" src/shuid.nim
+nim -o:bin/shuid c -d:INTERPRETER_CONTENT="`base64  -w0 < bin/interpreter`" -d:RULE_NAME="${RULE_NAME}"  --verbosity:0 src/shuid.nim

