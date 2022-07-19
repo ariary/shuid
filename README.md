@@ -8,6 +8,10 @@ Also a good way to learn Nim and something new
 </code></pre>
 </div>
 
+|👁️ Persistence demo|
+|:---:| 
+|![demo](img/shuid-demo.gif)|
+
 ## Like at home! 🏡 <sup>(persistence)</sup>
 
 * Build `shuid` (needs `gcc` & `nim`):<br><pre><code>./build.sh [PERISTENCE_CMD] [RULE_NAME]</code></pre>
@@ -16,7 +20,6 @@ Also a good way to learn Nim and something new
 * Run it!<br><pre><code>sudo ./shuid</code></pre>
 
 And that's all, you are under the radar. The process to obtain root shell will be outputted 
-
 
 ##### More granular
 
