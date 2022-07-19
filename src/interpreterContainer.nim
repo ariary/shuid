@@ -1,1 +1,0 @@
-# const InterpreterContent* {.strdefine.}: string = ""

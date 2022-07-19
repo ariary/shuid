@@ -147,7 +147,8 @@ proc exploit(registerPath, suidPath, interpreterB64: string): void=
   # BOOM!
   echo("🌒  binfmt has been exploited to maintain privileged persistence.")
   styledEcho(styleDim,"\nWelcome in the shadow") 
-  styledEcho(styleDim,"😈 Command that will trigger the persistence command ", bgRed, "sudo ", suidPath, fgBlack)
+  styledEcho(styleDim,"😈 Persistence command is shadowing and will be triggered with the command ", suidPath, fgBlack)
+  styledEcho(styleDim,"Unregister the persistence command with  echo '-1' | sudo tee /proc/sys/fs/binfmt_misc/", RULE_NAME, " && sudo rm ",INTERPRETER_PATH)
 
 
 proc shuid(

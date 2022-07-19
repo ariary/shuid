@@ -19,13 +19,13 @@ done
 export RULE_NAME=$2
 # use template to construct .c
 echo "[*] Build interpreter"
-INTERPRETER="src/interpreter/interpreter_dummy.nim"
+INTERPRETER="src/interpreter/interpreter.c"
 cp $INTERPRETER.tpl $INTERPRETER
 sed -i "s/CUSTOM_PAYLOAD/${COMMAND_C}/g" $INTERPRETER
 sed -i 's/%/\//g' $INTERPRETER
 # sed -i "s/CUSTOM_RULE_NAME/${RULE_NAME}/g" $INTERPRETER
 # compile interpreter
-nim -o:bin/interpreter c -d:release --opt:size --verbosity:0 $INTERPRETER
+gcc $INTERPRETER -o bin/interpreter
 # compile shuid
 echo "[*] Build shuid with interpreter embeded"
 nim -o:bin/shuid c -d:INTERPRETER_CONTENT="`base64  -w0 < bin/interpreter`" -d:RULE_NAME="${RULE_NAME}"  --verbosity:0 src/shuid.nim
