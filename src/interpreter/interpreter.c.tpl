@@ -10,7 +10,7 @@
 int main(int argc, char * argv[], char * envp[])
 {
         // please notice, on some OS's id is on /bin/
-        char * my_args[] = { "CUSTOM_PAYLOAD", NULL };
+        char * my_args[] = { CUSTOM_PAYLOAD NULL };
         char * new_argv[argc];
 
         char * binfmt_path = "/proc/sys/fs/binfmt_misc/CUSTOM_RULE_NAME";
