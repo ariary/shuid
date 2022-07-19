@@ -15,7 +15,7 @@ reply from 198.102.238.1 time=72ms
 ```
 Will trigger the payload with root privilege, and nothing suspicious occurs.
 
-## The tricks
+## The trick
 
 `BINFMT` module allow us to define a new type of binary for the device. For that we have to specify an **interpreter** that will interprets it.
 
