@@ -39,6 +39,13 @@ Under certain circumstances, the trick can be used to gain elevated privileged. 
 
 ## [Understand the trick](TRICK.md)
 
+## Limitations & enhancement
+* Interpeter content is provided at compilation time. However nim binaries are too big to be contained in command line
+  * provide a way to retrieve interpreter content from the network (http or whatever)
+* make a stealthier interpreter:
+  * simulate normal behavior of the SUID file (by forking and execute with tty)
+  * launch in the background the payload (with or without tty)
+
 
 <div align=center>
 <sup>
