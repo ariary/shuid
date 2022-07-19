@@ -17,9 +17,9 @@ Will trigger the payload with root privilege, and nothing suspicious occurs.
 
 ## The trick
 
-`BINFMT` module allow us to define a new type of binary for the device. For that we have to specify an **interpreter** that will interprets it.
+`BINFMT` module allows us to define a new type of binary type for the device. For that we have to specify an **interpreter** that will be automatically called to treat the new binary type when it is executed.
 
-For example it is possible to exec python script as follow if we register `*.py` with the interpret `/usr/bin/python`:
+For example it is possible to execute python script as follow if we register `*.py` with the interpreter `/usr/bin/python`:
 ```shell
 ./my_script.py
 ```
