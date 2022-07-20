@@ -14,20 +14,13 @@ Also a good way to learn Nim and something new
 
 ## Like at home! 🏡 <sup>(persistence)</sup>
 
-* Build `shuid` (needs `gcc` & `nim`):<br><pre><code>./build.sh [PERISTENCE_CMD] [RULE_NAME]</code></pre>
+* Build `shuid` (needs `gcc` & `nim`):<br><pre><code>./build.sh [PERSISTENCE_CMD] [RULE_NAME]</code></pre>
 
 * Transfer it on target
 * Run it!<br><pre><code>sudo ./shuid</code></pre>
 
 And that's all, you are under the radar. The process to obtain root shell will be outputted 
 
-##### More granular
-
-You have other possibilitles to sharpen the exploit. For example you can choose which SUID will hide your "shuid file" (*aka interpreter*).
-An example:
-```shell
-sudo ./shuid --file "/path/to/suid/file"
-```
 
 ## Road to root! 🛣 <sup>(privesc)</sup>
 
