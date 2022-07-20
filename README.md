@@ -42,9 +42,10 @@ Under certain circumstances, the trick can be used to gain elevated privileged. 
 ## Limitations & enhancement
 * Interpeter content is provided at compilation time. However nim binaries are too big to be contained in command line
   * provide a way to retrieve interpreter content from the network (http or whatever)
-* make a stealthier interpreter:
-  * simulate normal behavior of the SUID file (by forking and execute with tty)
-  * launch in the background the payload (with or without tty)
+  * current (ugly) workaround: write the base64 encoded file content directly within the variable `INTERPRETER_CONTENT` in `src/shuid.nim`
+* Only the Go interpreter works in a stealthy way ie:
+  * simulate normal behavior of the SUID file (by forking it and execute with tty)
+  * launch in the background the payload
 
 
 <div align=center>
