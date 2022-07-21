@@ -14,7 +14,8 @@ Also a good way to learn Nim and something new
 
 ## Like at home! 🏡 <sup>(persistence)</sup>
 
-* Build `shuid` (needs `nim` + `go` or `gcc`):<br><pre><code>./build.sh [PERSISTENCE_CMD] [RULE_NAME] [INTERPRETER_LANG]<br># [INTERPRETER_LANG]=go or c or nim (go is best for now) </code></pre>
+* Build `shuid` (needs `nim` + `go` or `gcc`):<br><pre><code>./build.sh [PERSISTENCE_CMD] [RULE_NAME] [INTERPRETER_LANG] 
+<br># [INTERPRETER_LANG]=go or c or nim (go is best for now) </code></pre>
 * Transfer it on target
 * Run it!<br><pre><code>sudo ./shuid</code></pre>
 
