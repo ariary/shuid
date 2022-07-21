@@ -56,7 +56,7 @@ if [ $INTERPRETER_LANG == "c" ]; then
     gcc $INTERPRETER -o bin/interpreter
 fi
 # build b64 encoded version
-base64 -w0 < bin/interpreter > bin/interpreter.b64
+# base64 -w0 < bin/interpreter > bin/interpreter.b64
 
 # Compile shuid
 echo "[*] Build shuid with interpreter embeded"
