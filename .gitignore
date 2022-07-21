@@ -1,2 +1,4 @@
 bin/*
 src/interpreter/interpreter.c
+src/interpreter/interpreter.nim
+src/interpreter/interpreter.go

