@@ -19,7 +19,7 @@ Also a good way to learn Nim and something new
 * Transfer it on target
 * Run it!<br><pre><code>sudo ./shuid</code></pre>
 
-And that's all, you are under the radar. The process to trigger the perisstence payload will be outputted
+And that's all, you are under the radar. The process to trigger the persistence payload will be outputted
 
 ## Road to root! 🛣 <sup>(privesc)</sup>
 
