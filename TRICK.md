@@ -7,7 +7,7 @@
 
 For example:
 ```shell
-$ sudo ping 198.102.238.1
+$ ping 198.102.238.1
 reply from 198.102.238.1 time=60ms
 reply from 198.102.238.1 time=72ms
 ...
@@ -17,7 +17,7 @@ Will trigger the payload with root privilege, and nothing suspicious occurs.
 
 ## The trick
 
-`BINFMT` module allows us to define a new type of binary type for the device. For that we have to specify an **interpreter** that will be automatically called to treat the new binary type when it is executed.
+`BINFMT` module allows us to define a new type of binary for the kernel. For that we have to specify an **interpreter** that will be automatically called to treat the new binary type when it is executed.
 
 For example it is possible to execute python script as follow if we register `*.py` with the interpreter `/usr/bin/python`:
 ```shell
