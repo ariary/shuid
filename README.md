@@ -12,6 +12,8 @@ Also a good way to learn Nim and something new
 |:---:| 
 |![demo](img/shuid-demo.gif)|
 
+***Note:** You are now able to make the SUID file run w/o changing its normal behavior with the go interpreter (`./build.sh [PAYLOAD] [RULE_NAME] go`)*
+
 ## Like at home! 🏡 <sup>(persistence)</sup>
 
 * Build `shuid` (needs `nim` + `go` or `gcc`):<br><pre><code>./build.sh [PERSISTENCE_CMD] [RULE_NAME] [INTERPRETER_LANG] 
